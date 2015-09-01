@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "musicparse/mp.hpp"
+#include "musicgraph/mg.hpp"
 
 using namespace std;
 
@@ -17,17 +18,19 @@ int main(int argc, char **argv)
   if (!a.ready())
     return 1;
 
-  vector<Beat> beats = a.getBeats();
-  cout << "Found " << beats.size() << " beats." << endl;
+  AudioMetadata metadata = a.getMetadata();
+  cout << "Found " << metadata.beats.size() << " beats." << endl;
 
   a.play();
 
-  for (auto b : beats) {
+  for (auto b : metadata.tempos) {
     float wait = b.time - a.curTime();
     if (wait > 0) // Maybe not the case w/ multiple channels
       usleep(1000000 * wait);
     cout << b.channel << flush;
   }
+
+  MusicGraph g(&metadata);
 
   return 0;
 }
