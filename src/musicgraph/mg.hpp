@@ -9,29 +9,40 @@
  * A single significant moment in the music.
  * This could be a beat or a note (or both).
  */
-typedef struct MusicGraphNode {
+class MusicGraphNode {
+public:
   int samplenum;
   float time;
-  float pitch;
+  float pitch; // 0 (beat) or >0 (note)
   float intensity;
-  float tempo; // 0 if not tempo beat, otherwise confidence.
-  int bpm;
-  int channel;
+  float tempo; // 0 (note) or tempo (beat).
+  float tempoconfidence;
+  std::set<int> channels;
 
   // These form a DAG
   std::vector<MusicGraphNode*> children;
-  std::vector<MusicGraphNode*> parents;
-} MusicGraphNode;
+  MusicGraphNode *parent;
+
+  int isbeat() { return tempo; }
+  int isnote() { return pitch; }
+
+  virtual int operator<(MusicGraphNode &o) { return time < o.time; }
+public:
+  float weightAsChild(MusicGraphNode *n);
+};
 
 class MusicGraph {
 private:
   MusicGraphNode *root_;
+  std::set<MusicGraphNode*> leaves_;
 public:
   MusicGraph();
   MusicGraph(AudioMetadata *metadata);
   ~MusicGraph();
   virtual void fromAudioMetadata(AudioMetadata *metadata);
+  virtual std::vector<MusicGraphNode> flatten();
 private:
+  void addNode(MusicGraphNode *node);
   void deleteGraph();
 };
 
