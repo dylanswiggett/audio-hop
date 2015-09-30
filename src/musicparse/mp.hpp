@@ -8,7 +8,7 @@
 typedef struct Beat {
   int samplenum;
   float time;
-  float pitch; // Unused
+  float pitch;
   float intensity; // Unused
   int channel;
 

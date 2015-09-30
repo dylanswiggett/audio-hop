@@ -11,6 +11,7 @@ using namespace std;
 
 #define ONSET_DETECT "mkl"
 #define TEMPO_DETECT "default"
+#define PITCH_DETECT "yinfft"
 
 Audio::Audio(const char *path)
 {
@@ -61,10 +62,12 @@ AudioMetadata Audio::getMetadata()
 
   aubio_onset_t *ons[num_channels];
   aubio_tempo_t  *ts[num_channels];
+  aubio_pitch_t  *ps[num_channels];
 
   for (int i = 0; i < num_channels; i++) {
     ons[i]  = new_aubio_onset(ONSET_DETECT, win_s, hop_s, samplerate);
     ts[i]   = new_aubio_tempo(TEMPO_DETECT, win_s, hop_s, samplerate);
+    ps[i]   = new_aubio_pitch(PITCH_DETECT, win_s, hop_s, samplerate);
   }
 
   fvec_t * in  = new_fvec(hop_s);
@@ -93,7 +96,12 @@ AudioMetadata Audio::getMetadata()
 	b.samplenum = aubio_onset_get_last(ons[channel]);
 	b.time = aubio_onset_get_last_s(ons[channel]);
 	b.channel = channel;
-	// TODO: pitch, intensity.
+
+	// Find pitch
+	aubio_pitch_do(ps[channel], in, out);
+	b.pitch = fvec_get_sample(out, 0);
+
+	// TODO: Intensity
 	data_.beats.push_back(b);
       }
 
@@ -107,7 +115,7 @@ AudioMetadata Audio::getMetadata()
 	t.confidence = aubio_tempo_get_confidence(ts[channel]);
 	data_.tempos.push_back(t);
       }
-    
+
       // Progress
       int prog = 10 * (++processed_hops) / num_hops;
       if (prog > lastp) {
@@ -120,6 +128,7 @@ AudioMetadata Audio::getMetadata()
   for (int i = 0; i < num_channels; i++) {
     del_aubio_onset(ons[i]);
     del_aubio_tempo(ts[i]);
+    del_aubio_pitch(ps[i]);
   }
   del_fvec(in);
   del_fvec(out);

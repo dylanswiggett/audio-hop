@@ -27,12 +27,47 @@ int main(int argc, char **argv)
 
   a.play();
 
+  vector<MusicGraphNode*> currentNodes;
+  vector<MusicGraphNode*> newNodes;
+  currentNodes.push_back(g.root());
+
+  while (currentNodes.size() > 0) {
+    newNodes.clear();
+    
+    float earliest = 1000000;
+
+    for (auto node : currentNodes) {
+      if (node->time <= a.curTime()) {
+	cout << "* ";
+	for (auto child : node->children) {
+	  newNodes.push_back(child);
+	  earliest = min(child->time, earliest);
+	}
+      } else {
+	cout << "  ";
+	newNodes.push_back(node);
+	earliest = min(node->time, earliest);
+      }
+    }
+
+    cout << endl;
+    currentNodes = newNodes;
+    float wait = earliest - a.curTime();
+    if (wait > 0)
+      usleep(1000000 * wait);
+  }
+
+  /* Flattened printout
   for (auto n : ns) {
     float wait = n.time - a.curTime();
     if (wait > 0) // Maybe not the case w/ multiple channels
       usleep(1000000 * wait);
-    cout << '0' << flush;
+    if (n.isbeat())
+      cout << '1' << flush;
+    else
+      cout << '0' << flush;
   }
+  */
 
   return 0;
 }

@@ -26,7 +26,11 @@ public:
   int isbeat() { return tempo; }
   int isnote() { return pitch; }
 
+  virtual ~MusicGraphNode() { }
+
   virtual int operator<(MusicGraphNode &o) { return time < o.time; }
+private:
+  std::vector<float> getFeatureVector();
 public:
   float weightAsChild(MusicGraphNode *n);
 };
@@ -41,6 +45,7 @@ public:
   ~MusicGraph();
   virtual void fromAudioMetadata(AudioMetadata *metadata);
   virtual std::vector<MusicGraphNode> flatten();
+  virtual MusicGraphNode* root();
 private:
   void addNode(MusicGraphNode *node);
   void deleteGraph();

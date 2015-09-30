@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <vector>
 #include <set>
@@ -10,10 +11,31 @@ using namespace std;
 #define MAX_PARENT_DELAY 5.0
 #define MAX_PARENT_DEPTH 4
 
+vector<float> MusicGraphNode::getFeatureVector()
+{
+  vector<float> features;
+  // TODO Weight features? Adaptively?
+  features.push_back(time);
+  features.push_back(pitch);
+  features.push_back(intensity);
+  return features;
+}
+
 float MusicGraphNode::weightAsChild(MusicGraphNode *n)
 {
-  // TODO
-  return n->time - time;
+  float similarity = 0;
+
+  vector<float> features = getFeatureVector();
+  vector<float> otherFeatures = n->getFeatureVector();
+
+  assert(features.size() == otherFeatures.size());
+
+  for (unsigned int i = 0; i < features.size(); i++) {
+    float diff = features[i] - otherFeatures[i];
+    similarity += diff * diff;
+  }
+  
+  return -sqrt(similarity); // Closer to zero = better
 }
 
 MusicGraph::MusicGraph()
@@ -44,7 +66,7 @@ void MusicGraph::fromAudioMetadata(AudioMetadata *metadata)
   vector<Tempo> tempos(metadata->tempos);
 
   float curtempo = .1;
-  float curtempo_confidence = 0;
+  //float curtempo_confidence = 0; // TODO
 
   while (beats.size() || tempos.size()) {
     float maxbeatwidth = curtempo / 32;
@@ -114,11 +136,17 @@ vector<MusicGraphNode> MusicGraph::flatten()
   return out;
 }
 
+MusicGraphNode* MusicGraph::root()
+{
+  return root_;
+}
+
 void MusicGraph::addNode(MusicGraphNode *node)
 {
   if (root_ == nullptr) {
     root_ = node;
     leaves_.insert(root_);
+    return;
   }
 
   set<MusicGraphNode*> prevnodes;
