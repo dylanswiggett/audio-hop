@@ -128,8 +128,8 @@ vector<MusicGraphNode> MusicGraph::flatten()
 
   vector<MusicGraphNode> out;
   for (auto n : sortednodes) {
-    n.parent = nullptr;
-    n.children.clear();
+    //n.parent = nullptr;
+    //n.children.clear();
     out.push_back(n);
   }
 

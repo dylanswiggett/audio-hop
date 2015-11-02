@@ -4,6 +4,7 @@
 
 #include "musicparse/mp.hpp"
 #include "musicgraph/mg.hpp"
+#include "musicgraph/MusicGraphRender.hpp"
 
 using namespace std;
 
@@ -25,6 +26,17 @@ int main(int argc, char **argv)
 
   cout << "Found " << ns.size() << " beats." << endl;
 
+  MusicGraphRender render(&g, 800, 600);
+  render.setTime(0);
+  render.setVisible(true);
+  a.play();
+
+  while (render.isOpen()) {
+    render.setTime(a.curTime());
+    render.update();
+  }
+  
+  /*
   a.play();
 
   vector<MusicGraphNode*> currentNodes;
@@ -38,7 +50,10 @@ int main(int argc, char **argv)
 
     for (auto node : currentNodes) {
       if (node->time <= a.curTime()) {
-	cout << "* ";
+	if (node->isbeat())
+	  cout << "X ";
+	else
+	  cout << "* ";
 	for (auto child : node->children) {
 	  newNodes.push_back(child);
 	  earliest = min(child->time, earliest);

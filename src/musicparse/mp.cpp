@@ -85,9 +85,12 @@ AudioMetadata Audio::getMetadata()
   for (uint i = 0; i < num_samples - step; i += step) {
     // Load input data_
     for (int channel = 0; channel < num_channels; channel++) {
+      float intensity = 0;
       for (uint j = 0; j < hop_s; j++) {
 	in->data[j] = samples[i + j * num_channels + channel];
+	intensity += in->data[j];
       }
+      intensity /= hop_s;
 
       // Find onsets
       aubio_onset_do(ons[channel], in, out);
@@ -96,6 +99,8 @@ AudioMetadata Audio::getMetadata()
 	b.samplenum = aubio_onset_get_last(ons[channel]);
 	b.time = aubio_onset_get_last_s(ons[channel]);
 	b.channel = channel;
+
+	b.intensity = intensity;
 
 	// Find pitch
 	aubio_pitch_do(ps[channel], in, out);

@@ -28,7 +28,7 @@ public:
 
   virtual ~MusicGraphNode() { }
 
-  virtual int operator<(MusicGraphNode &o) { return time < o.time; }
+  virtual int operator<(const MusicGraphNode &o) const { return time < o.time; }
 private:
   std::vector<float> getFeatureVector();
 public:

@@ -3,7 +3,7 @@ CFLAGS = -g -Wall -std=c++11
 EXEC = main
 SOURCES = $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
-LINKERS = -lsfml-audio -lsfml-system -laubio
+LINKERS = -lsfml-audio -lsfml-window -lsfml-graphics -lsfml-system -laubio
 
 # Main target
 $(EXEC): $(OBJECTS)
